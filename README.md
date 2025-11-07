@@ -11,14 +11,22 @@
 
 ---
 
-## 🔥 Features
+## 🔥 NEW in v1.0: Ultimate Edition
 
 ### **Advanced Credential Engine**
-- 🔐 **100,000+ Password Database** - Massive credential coverage
-- 🎯 **Smart Attack Strategies** - Ultra-fast to comprehensive
-- 🏷️ **Brand-Specific Targeting** - Manufacturer-aware credentials
-- 🧠 **Pattern Generation** - Intelligent password variations
-- ⚡ **Multi-threaded Testing** - Concurrent validation
+- **100,000+ Password Database** - Massive credential coverage
+- **Smart Attack Strategies** - From ultra-fast (100) to brute-force (100K+)
+- **Brand-Specific Targeting** - Manufacturer-aware credential selection
+- **Pattern Generation** - Intelligent password variations
+- **Multi-threaded Testing** - Concurrent credential validation
+
+### **Ultimate Features**
+- 🚀 **Massive 1000+ Port Scanning** - Comprehensive coverage
+- 🎯 **CP Plus & DVR/NVR Detection** - Enhanced brand identification
+- 📹 **Live Stream Validation** - RTSP/HTTP/RTMP/MMS/HLS support
+- 🔐 **Ultimate Credential Testing** - Multi-threaded with rate limiting
+- 🎨 **Beautiful ASCII Art** - Professional branding and output
+- 📊 **Enterprise Reporting** - Comprehensive security assessment
 
 ### **Core Capabilities**
 - ✅ **1000+ Camera Ports** - Comprehensive port scanning
