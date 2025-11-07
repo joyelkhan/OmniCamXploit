@@ -72,10 +72,17 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('omnicamxploit.log'),
+        logging.FileHandler('omnicamxploit.log', encoding='utf-8'),
         logging.StreamHandler(sys.stdout)
     ]
 )
+
+# Fix Windows console encoding for emojis
+if sys.platform == 'win32':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except:
+        pass
 
 for handler in logging.getLogger().handlers:
     if isinstance(handler, logging.StreamHandler):
@@ -635,7 +642,7 @@ class UltimateCredentialTester:
         }
         
         for brand_cred_list in brand_creds.values():
-            credentials.extend(cred_list)
+            credentials.extend(brand_cred_list)
         
         # 🔢 NUMERIC VARIATIONS (1000+ combinations)
         for i in range(1000):
