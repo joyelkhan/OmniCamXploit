@@ -13,7 +13,12 @@
 ▀▄▄▄▄▄▀▄▄▄▀▄▄█▄▄▀▀▄▄▄▀▀▄▄▄▄▄▀▄▄█▄▄▀▀▄▄▄▀▀▄▄▄▀▀▀▄▄▀▄▄▀▀▄▄▄▄▀▀▄▄▄▀▀▄▄▀▄▄▄▄▄▀▄▄▀▄▄▀▄▄▄▀▄▄▄▄▄▀▀▄▄▄▀▀▄▄▄▄▄▀▄▄▄▄▀▀
 
                             U L T I M A T E   C A M E R A   S E C U R I T Y   F R A M E W O R K
-                                       GitHub: spyboy-productions/CamXploit
+                                       GitHub: joyelkhan/OmniCamXploit
+
+OmniCamXploit v1.0 - Professional Camera Security Assessment Framework
+Author: Md. Abu Naser Khan
+GitHub: https://github.com/joyelkhan/OmniCamXploit
+License: MIT
 """
 
 import argparse
@@ -32,8 +37,14 @@ from urllib.parse import urlparse, urljoin
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from colorama import Fore, Style, Back, init
 import urllib3
-import geoip2.database
 from tqdm import tqdm
+
+# Optional GeoIP2 support
+try:
+    import geoip2.database
+    GEOIP_AVAILABLE = True
+except ImportError:
+    GEOIP_AVAILABLE = False
 
 # Initialize colorama and disable SSL warnings
 init(autoreset=True)
@@ -61,7 +72,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('camxploit_ultimate.log'),
+        logging.FileHandler('omnicamxploit.log'),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -745,10 +756,14 @@ class GeoLocationMapper:
     
     def _initialize_geoip_reader(self):
         """🗺️ Initialize GeoIP database"""
+        if not GEOIP_AVAILABLE:
+            logger.warning("🌍 GeoIP2 library not installed - geolocation disabled")
+            return None
+        
         try:
             return geoip2.database.Reader('GeoLite2-City.mmdb')
         except:
-            logger.warning("🌍 GeoIP database not available")
+            logger.warning("🌍 GeoIP database file not available - geolocation disabled")
             return None
     
     def get_location(self, ip: str) -> Optional[Dict[str, Any]]:
